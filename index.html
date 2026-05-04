@@ -146,76 +146,81 @@ function answer(op, btn){
 
 function endGame(){
 document.body.innerHTML = `
-<div class='p-6 max-w-4xl mx-auto text-white'>
+<div class="p-6 max-w-4xl mx-auto text-white">
 
-<h1 class='text-3xl mb-4 text-center'>📊 Resultado Final</h1>
+<h1 class="text-3xl mb-4 text-center">📊 Resultado Final</h1>
 
-<p class='text-center'>⚖️ Ética: ${etica} | 🔓 Risco: ${risco}</p>
+<p class="text-center">⚖️ Ética: ${etica} | 🔓 Risco: ${risco}</p>
 
-<hr class='my-6'>
+<hr class="my-6">
 
-<h2 class='text-2xl mb-4'>🧠 Dilemas Éticos</h2>
+<h2 class="text-2xl mb-4">🧠 Dilemas Éticos</h2>
 
-${accordion("🔓 Pirataria",
-"✔ Amplia acesso à cultura<br>❌ Prejudica criadores<br><b>Dilema:</b> acesso vs legalidade")}
+<div class="border border-white rounded mb-3">
+<button onclick="toggleAccordion(this)" class="w-full text-left p-3 font-bold">🔓 Pirataria ⬇</button>
+<div class="hidden p-3 border-t border-white text-sm">
+✔ Amplia acesso à cultura<br>
+❌ Prejudica criadores<br>
+<b>Dilema:</b> acesso vs legalidade
+</div>
+</div>
 
-${accordion("🔐 Segurança de Dados",
-"✔ Protege usuários<br>❌ Falhas expõem dados<br><b>Dilema:</b> conveniência vs proteção")}
+<div class="border border-white rounded mb-3">
+<button onclick="toggleAccordion(this)" class="w-full text-left p-3 font-bold">🔐 Segurança de Dados ⬇</button>
+<div class="hidden p-3 border-t border-white text-sm">
+✔ Protege usuários<br>
+❌ Falhas expõem dados<br>
+<b>Dilema:</b> conveniência vs proteção
+</div>
+</div>
 
-${accordion("👁️ Privacidade",
-"✔ Controle dos dados<br>❌ Troca por conveniência<br><b>Dilema:</b> personalização vs vigilância")}
+<div class="border border-white rounded mb-3">
+<button onclick="toggleAccordion(this)" class="w-full text-left p-3 font-bold">👁️ Privacidade ⬇</button>
+<div class="hidden p-3 border-t border-white text-sm">
+✔ Controle dos dados<br>
+❌ Troca por conveniência<br>
+<b>Dilema:</b> personalização vs vigilância
+</div>
+</div>
 
-${accordion("⚖️ Uso da Informação",
-"✔ Liberdade de expressão<br>❌ Fake news causam danos<br><b>Dilema:</b> liberdade vs responsabilidade")}
+<div class="border border-white rounded mb-3">
+<button onclick="toggleAccordion(this)" class="w-full text-left p-3 font-bold">⚖️ Uso da Informação ⬇</button>
+<div class="hidden p-3 border-t border-white text-sm">
+✔ Liberdade de expressão<br>
+❌ Fake news causam danos<br>
+<b>Dilema:</b> liberdade vs responsabilidade
+</div>
+</div>
 
-<hr class='my-6'>
+<hr class="my-6">
 
-<h2 class='text-xl'>⚖️ LGPD</h2>
-<p class='text-sm mb-2'>
+<h2 class="text-xl">⚖️ LGPD</h2>
+<p class="text-sm mb-2">
 A Lei Geral de Proteção de Dados regula como empresas e organizações utilizam dados pessoais no Brasil,
 garantindo mais transparência, segurança e controle para o usuário.
 </p>
+
 <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" target="_blank" class="text-blue-400 underline">
 Acessar LGPD oficial
 </a>
 
-<h3 class='mt-4'>📜 Direitos do Titular (Art.18)</h3>
-<p class='text-sm mb-2'>
-A LGPD garante que o usuário tenha controle sobre seus próprios dados pessoais.
-</p>
+<h3 class="mt-4">📜 Direitos do Titular (Art.18)</h3>
 <ul class="list-disc ml-5 text-sm">
-<li><b>Acesso:</b> saber quais dados estão sendo utilizados</li>
-<li><b>Correção:</b> ajustar informações incorretas</li>
-<li><b>Exclusão:</b> solicitar a remoção dos dados</li>
-<li><b>Revogar consentimento:</b> parar o uso dos dados a qualquer momento</li>
+<li><b>Acesso:</b> saber quais dados estão sendo usados</li>
+<li><b>Correção:</b> corrigir dados errados</li>
+<li><b>Exclusão:</b> pedir remoção</li>
+<li><b>Revogar consentimento:</b> parar uso dos dados</li>
 </ul>
 
-<h3 class='mt-6'>🌍 Casos reais</h3>
-<p class='text-sm'><b>Facebook / Cambridge Analytica:</b> dados de milhões de usuários foram coletados sem consentimento e utilizados para influenciar decisões políticas.</p>
-<p class='text-sm'><b>Vazamentos no Brasil:</b> falhas de segurança expuseram informações como CPF, telefone e endereço de milhões de pessoas, aumentando riscos de fraudes e golpes.</p>
-
-<p class='mt-6 text-gray-400'>
-💡 Conclusão: suas decisões mostram como pequenas escolhas impactam sua segurança e a sociedade digital.
-</p>
+<h3 class="mt-6">🌍 Casos reais</h3>
+<p class="text-sm"><b>Cambridge Analytica:</b> uso indevido de dados para influenciar eleições.</p>
+<p class="text-sm"><b>Vazamentos no Brasil:</b> milhões de dados expostos por falhas de segurança.</p>
 
 </div>
 `;
 }
 
-function accordion(title, content){
-return `
-<div class='border border-white rounded mb-3'>
-<button onclick="toggle(this)" class='w-full text-left p-3 font-bold'>
-${title} ⬇
-</button>
-<div class='hidden p-3 border-t border-white text-sm'>
-${content}
-</div>
-</div>
-`;
-}
-
-function toggle(btn){
+function toggleAccordion(btn){
 const content = btn.nextElementSibling;
 content.classList.toggle("hidden");
 }
