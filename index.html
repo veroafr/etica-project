@@ -1,0 +1,73 @@
+function endGame(){
+
+const content = `
+<div class="p-6 max-w-4xl mx-auto text-white">
+
+<h1 class="text-3xl mb-4 text-center">📊 Resultado Final</h1>
+
+<p class="text-center">⚖️ Ética: ${etica} | 🔓 Risco: ${risco}</p>
+
+<hr class="my-6">
+
+<h2 class="text-2xl mb-4">🧠 Dilemas Éticos</h2>
+
+${accordion("🔓 Pirataria",
+"✔ Amplia acesso à cultura<br>❌ Prejudica criadores<br><b>Dilema:</b> acesso vs legalidade")}
+
+${accordion("🔐 Segurança de Dados",
+"✔ Protege usuários<br>❌ Falhas expõem dados<br><b>Dilema:</b> conveniência vs proteção")}
+
+${accordion("👁️ Privacidade",
+"✔ Controle dos dados<br>❌ Troca por conveniência<br><b>Dilema:</b> personalização vs vigilância")}
+
+${accordion("⚖️ Uso da Informação",
+"✔ Liberdade de expressão<br>❌ Fake news causam danos<br><b>Dilema:</b> liberdade vs responsabilidade")}
+
+<hr class="my-6">
+
+<h2 class="text-xl">⚖️ LGPD</h2>
+<p class="text-sm mb-2">
+Lei que regula o uso de dados pessoais no Brasil, garantindo segurança e controle ao usuário.
+</p>
+
+<a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm"
+target="_blank"
+class="text-blue-400 underline">
+Acessar LGPD oficial
+</a>
+
+<h3 class="mt-4">📜 Direitos do Titular (Art.18)</h3>
+<ul class="list-disc ml-5 text-sm">
+<li><b>Acesso:</b> saber quais dados estão sendo usados</li>
+<li><b>Correção:</b> corrigir dados errados</li>
+<li><b>Exclusão:</b> pedir remoção</li>
+<li><b>Revogar consentimento:</b> parar uso dos dados</li>
+</ul>
+
+<h3 class="mt-6">🌍 Casos reais</h3>
+<p class="text-sm"><b>Cambridge Analytica:</b> uso indevido de dados para influenciar eleições.</p>
+<p class="text-sm"><b>Vazamentos no Brasil:</b> milhões de dados expostos por falhas de segurança.</p>
+
+</div>
+`;
+
+document.body.innerHTML = content;
+}
+
+function accordion(title, content){
+return `
+<div class="border border-white rounded mb-3">
+<button onclick="toggleAccordion(this)" class="w-full text-left p-3 font-bold">
+${title} ⬇
+</button>
+<div class="hidden p-3 border-t border-white text-sm">
+${content}
+</div>
+</div>
+`;
+}
+
+function toggleAccordion(btn){
+const content = btn.nextElementSibling;
+content.classList.toggle("hidden");
+}
