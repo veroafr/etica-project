@@ -19,22 +19,28 @@
 
 <body class="bg-slate-900 text-white flex items-center justify-center min-h-screen">
 
+<!-- START -->
 <div id="startScreen" class="text-center max-w-xl p-6">
   <h1 class="text-3xl mb-4">📱 Um Dia na Sua Vida Digital</h1>
-  <p class="mb-2 text-lg">🧠 Descubra que tipo de usuário digital você é...</p>
-  <p class="mb-6 text-gray-300">Suas decisões revelam como você lida com ética, privacidade e informação.</p>
+  <p class="mb-2 text-lg">🧠 Descubra seu perfil digital</p>
+  <p class="mb-6 text-gray-300">Suas escolhas mostram sua ética online.</p>
   <button onclick="startGame()" class="border border-white px-6 py-3 rounded hover:bg-white hover:text-black">
     ▶ Começar
   </button>
 </div>
 
+<!-- GAME -->
 <div id="gameScreen" class="hidden text-center max-w-xl p-6">
   <h1 class="text-2xl mb-4">🌐 Sua Jornada Digital</h1>
+
   <p id="counter" class="mb-2 text-sm text-gray-400"></p>
   <p id="story" class="mb-3 text-gray-300"></p>
   <p id="question" class="mb-6 text-lg"></p>
+
   <div id="options" class="space-y-3"></div>
+
   <div id="feedback" class="mt-4 text-sm hidden p-3 rounded border"></div>
+
   <div class="mt-6">
     ⚖️ Ética: <span id="etica">0</span> |
     🔓 Risco: <span id="risco">0</span>
@@ -50,41 +56,82 @@ function startGame(){
   load();
 }
 
+/* 🎮 SCENES */
 const scenes = [
-{story:"⏰ Você acorda e pega o celular.",question:"Você encontra um filme pirata. O que faz?",
-options:[{text:"Assistir",e:-2,r:2,f:"Pirataria prejudica criadores."},{text:"Ignorar",e:2,r:0,f:"Você respeita direitos autorais."}]},
-{story:"📱 Você baixa um app.",question:"Ele pede acesso a dados. O que faz?",
-options:[{text:"Aceitar",e:0,r:3,f:"Risco de exposição."},{text:"Revisar",e:2,r:-1,f:"Protege sua privacidade."}]},
-{story:"📰 Você vê uma notícia chocante.",question:"O que faz?",
-options:[{text:"Compartilhar",e:-2,r:1,f:"Pode ser fake news."},{text:"Verificar",e:3,r:-1,f:"Responsável."}]},
-{story:"💻 No trabalho falam de vazamento.",question:"Como reage?",
-options:[{text:"Ignorar",e:0,r:2,f:"Problema continua."},{text:"Cobrar",e:2,r:-1,f:"Você valoriza segurança."}]},
-{story:"🔐 Você usa mesma senha.",question:"O que decide?",
-options:[{text:"Continuar",e:-1,r:3,f:"Inseguro."},{text:"Trocar",e:2,r:-2,f:"Seguro."}]},
-{story:"📍 App quer localização.",question:"Você aceita?",
-options:[{text:"Sim",e:0,r:2,f:"Menos privacidade."},{text:"Avaliar",e:2,r:-1,f:"Consciência."}]},
-{story:"📧 Email suspeito.",question:"O que faz?",
-options:[{text:"Responder",e:-2,r:3,f:"Golpe."},{text:"Ignorar",e:3,r:-2,f:"Seguro."}]},
-{story:"💬 Amigo manda fake news.",question:"Como reage?",
-options:[{text:"Ignorar",e:0,r:1,f:"Desinformação continua."},{text:"Avisar",e:2,r:-1,f:"Responsável."}]},
-{story:"📦 Precisa de software.",question:"Baixa pirata?",
-options:[{text:"Sim",e:-2,r:2,f:"Ilegal."},{text:"Não",e:2,r:0,f:"Correto."}]},
-{story:"🔒 Segurança extra.",question:"Ativa?",
-options:[{text:"Não",e:-1,r:2,f:"Vulnerável."},{text:"Sim",e:2,r:-2,f:"Seguro."}]},
-{story:"📊 Uso de dados.",question:"Aceita?",
-options:[{text:"Sim",e:0,r:1,f:"Menos controle."},{text:"Limitar",e:2,r:-1,f:"Mais privacidade."}]},
-{story:"📱 Instala apps.",question:"Verifica permissões?",
-options:[{text:"Não",e:-1,r:2,f:"Risco."},{text:"Sim",e:2,r:-1,f:"Consciência."}]},
-{story:"🧾 Termos aparecem.",question:"Você lê?",
-options:[{text:"Nunca",e:0,r:2,f:"Falta informação."},{text:"Às vezes",e:2,r:-1,f:"Melhor decisão."}]},
-{story:"📣 Post polêmico viraliza.",question:"Compartilha?",
-options:[{text:"Sim",e:-2,r:1,f:"Impacto negativo."},{text:"Verificar",e:2,r:-1,f:"Responsável."}]},
+{story:"⏰ Você acorda e vê que o filme que esperava lançou.",question:"O que faz?",
+options:[
+{text:"Usa pirataria.",e:-2,r:2,f:"Pirataria prejudica criadores."},
+{text:"Espera lançamento oficial.",e:2,r:0,f:"Você apoia conteúdo legal."}
+]},
+
+{story:"📱 App pede permissões.",question:"O que faz?",
+options:[
+{text:"Aceita tudo.",e:0,r:3,f:"Risco de dados expostos."},
+{text:"Analisa permissões.",e:2,r:-1,f:"Boa prática de privacidade."}
+]},
+
+{story:"📰 Notícia viral.",question:"O que faz?",
+options:[
+{text:"Compartilha sem verificar.",e:-2,r:1,f:"Fake news podem se espalhar."},
+{text:"Verifica antes.",e:3,r:-1,f:"Você evita desinformação."}
+]},
+
+{story:"💻 Vazamento de dados.",question:"Reação?",
+options:[
+{text:"Ignora.",e:0,r:2,f:"Problema continua."},
+{text:"Age para resolver.",e:2,r:-1,f:"Boa prática de segurança."}
+]},
+
+{story:"🔐 Senhas.",question:"O que faz?",
+options:[
+{text:"Reutiliza senha.",e:-1,r:3,f:"Risco de ataque em cadeia."},
+{text:"Usa senhas diferentes.",e:2,r:-2,f:"Mais segurança."}
+]},
+
+{story:"📍 Localização.",question:"Aceita?",
+options:[
+{text:"Sim.",e:0,r:2,f:"Exposição de rotina."},
+{text:"Só quando necessário.",e:2,r:-1,f:"Mais privacidade."}
+]},
+
+{story:"📧 E-mail suspeito.",question:"O que faz?",
+options:[
+{text:"Clica no link.",e:-2,r:3,f:"Phishing perigoso."},
+{text:"Denuncia spam.",e:3,r:-2,f:"Protege você e outros."}
+]},
+
+{story:"💬 Fake news.",question:"O que faz?",
+options:[
+{text:"Compartilha.",e:-2,r:1,f:"Desinformação."},
+{text:"Verifica.",e:2,r:-1,f:"Responsável."}
+]},
+
+{story:"📦 Software pago.",question:"O que faz?",
+options:[
+{text:"Baixa pirata.",e:-2,r:2,f:"Risco de malware."},
+{text:"Compra oficial.",e:2,r:0,f:"Seguro e legal."}
+]},
+
+{story:"🔒 2FA.",question:"Ativa?",
+options:[
+{text:"Não.",e:-1,r:2,f:"Menos segurança."},
+{text:"Sim.",e:2,r:-2,f:"Mais proteção."}
+]},
+
 {story:"🌙 Final do dia.",question:"Usa dados de outra pessoa?",
-options:[{text:"Usar",e:-3,r:2,f:"Violação ética."},{text:"Respeitar",e:3,r:-1,f:"Correto."}]}
+options:[
+{text:"Sim.",e:-3,r:2,f:"Violação ética e legal."},
+{text:"Não.",e:3,r:-1,f:"Você age com ética digital."}
+]}
 ];
 
+/* 🎮 LOAD */
 function load(){
-  if(step >= scenes.length){ endGame(); return; }
+  if(step >= scenes.length){
+    endGame();
+    return;
+  }
+
   let s = scenes[step];
 
   document.getElementById("story").innerText = s.story;
@@ -96,11 +143,8 @@ function load(){
 
   let fb = document.getElementById("feedback");
   fb.classList.add("hidden");
-  fb.innerText = "";
 
-  let shuffled = [...s.options].sort(() => Math.random() - 0.5);
-
-  shuffled.forEach(opt => {
+  s.options.forEach(opt => {
     let btn = document.createElement("button");
     btn.className = "w-full border border-white p-3 rounded hover:bg-white hover:text-black";
     btn.innerText = opt.text;
@@ -109,6 +153,7 @@ function load(){
   });
 }
 
+/* 🎯 ANSWER */
 function answer(op, btn){
   etica += op.e;
   risco += op.r;
@@ -117,6 +162,7 @@ function answer(op, btn){
   document.getElementById("risco").innerText = risco;
 
   document.querySelectorAll("#options button").forEach(b => b.disabled = true);
+  document.getElementById("options").style.pointerEvents = "none";
 
   let fb = document.getElementById("feedback");
 
@@ -125,104 +171,40 @@ function answer(op, btn){
     btn.style.border = "2px solid #22c55e";
     fb.style.background = "#14532d";
     fb.style.border = "2px solid #22c55e";
+    document.body.style.background = "#052e16";
   } else {
     btn.style.background = "#7f1d1d";
     btn.style.border = "2px solid #ef4444";
     fb.style.background = "#7f1d1d";
     fb.style.border = "2px solid #ef4444";
+    document.body.style.background = "#450a0a";
+
     document.getElementById("gameScreen").classList.add("shake");
-    setTimeout(()=>document.getElementById("gameScreen").classList.remove("shake"),400);
+    setTimeout(()=>{
+      document.getElementById("gameScreen").classList.remove("shake");
+    },400);
   }
 
   fb.innerText = op.f;
   fb.classList.remove("hidden");
 
-  document.body.style.background = op.e > 0 ? "#022c22" : "#450a0a";
-  setTimeout(()=>{ document.body.style.background = ""; },800);
-
-  step++;
-  setTimeout(load,1500);
+  setTimeout(()=>{
+    document.body.style.background = "";
+    document.getElementById("options").style.pointerEvents = "auto";
+    step++;
+    load();
+  }, 5000);
 }
 
+/* 🏁 END */
 function endGame(){
 document.body.innerHTML = `
-<div class="p-6 max-w-4xl mx-auto text-white">
-
-<h1 class="text-3xl mb-4 text-center">📊 Resultado Final</h1>
-
-<p class="text-center">⚖️ Ética: ${etica} | 🔓 Risco: ${risco}</p>
-
-<hr class="my-6">
-
-<h2 class="text-2xl mb-4">🧠 Dilemas Éticos</h2>
-
-<div class="border border-white rounded mb-3">
-<button onclick="toggleAccordion(this)" class="w-full text-left p-3 font-bold">🔓 Pirataria ⬇</button>
-<div class="hidden p-3 border-t border-white text-sm">
-✔ Amplia acesso à cultura<br>
-❌ Prejudica criadores<br>
-<b>Dilema:</b> acesso vs legalidade
-</div>
-</div>
-
-<div class="border border-white rounded mb-3">
-<button onclick="toggleAccordion(this)" class="w-full text-left p-3 font-bold">🔐 Segurança de Dados ⬇</button>
-<div class="hidden p-3 border-t border-white text-sm">
-✔ Protege usuários<br>
-❌ Falhas expõem dados<br>
-<b>Dilema:</b> conveniência vs proteção
-</div>
-</div>
-
-<div class="border border-white rounded mb-3">
-<button onclick="toggleAccordion(this)" class="w-full text-left p-3 font-bold">👁️ Privacidade ⬇</button>
-<div class="hidden p-3 border-t border-white text-sm">
-✔ Controle dos dados<br>
-❌ Troca por conveniência<br>
-<b>Dilema:</b> personalização vs vigilância
-</div>
-</div>
-
-<div class="border border-white rounded mb-3">
-<button onclick="toggleAccordion(this)" class="w-full text-left p-3 font-bold">⚖️ Uso da Informação ⬇</button>
-<div class="hidden p-3 border-t border-white text-sm">
-✔ Liberdade de expressão<br>
-❌ Fake news causam danos<br>
-<b>Dilema:</b> liberdade vs responsabilidade
-</div>
-</div>
-
-<hr class="my-6">
-
-<h2 class="text-xl">⚖️ LGPD</h2>
-<p class="text-sm mb-2">
-A Lei Geral de Proteção de Dados regula como empresas e organizações utilizam dados pessoais no Brasil,
-garantindo mais transparência, segurança e controle para o usuário.
-</p>
-
-<a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" target="_blank" class="text-blue-400 underline">
-Acessar LGPD oficial
-</a>
-
-<h3 class="mt-4">📜 Direitos do Titular (Art.18)</h3>
-<ul class="list-disc ml-5 text-sm">
-<li><b>Acesso:</b> saber quais dados estão sendo usados</li>
-<li><b>Correção:</b> corrigir dados errados</li>
-<li><b>Exclusão:</b> pedir remoção</li>
-<li><b>Revogar consentimento:</b> parar uso dos dados</li>
-</ul>
-
-<h3 class="mt-6">🌍 Casos reais</h3>
-<p class="text-sm"><b>Cambridge Analytica:</b> uso indevido de dados para influenciar eleições.</p>
-<p class="text-sm"><b>Vazamentos no Brasil:</b> milhões de dados expostos por falhas de segurança.</p>
-
+<div class="text-center p-6">
+<h1 class="text-3xl">📊 Resultado Final</h1>
+<p class="mt-4">⚖️ Ética: ${etica} | 🔓 Risco: ${risco}</p>
+<p class="mt-6">Obrigado por jogar o Labirinto Ético Digital.</p>
 </div>
 `;
-}
-
-function toggleAccordion(btn){
-const content = btn.nextElementSibling;
-content.classList.toggle("hidden");
 }
 </script>
 
