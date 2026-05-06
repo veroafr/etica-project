@@ -13,7 +13,10 @@
   75% { transform: translate(5px, 0px); }
   100% { transform: translate(0px, 0px); }
 }
-.shake { animation: shake 0.4s; }
+
+.shake {
+  animation: shake 0.4s;
+}
 
 .score-anim {
   transform: scale(1.2);
@@ -27,6 +30,7 @@
 <div id="startScreen" class="text-center max-w-xl p-6">
   <h1 class="text-3xl mb-4">📱 Um Dia na Sua Vida Digital</h1>
   <p class="mb-4">Descubra seu perfil digital</p>
+
   <button onclick="startGame()" class="border px-6 py-3 rounded hover:bg-white hover:text-black">
     ▶ Começar
   </button>
@@ -34,30 +38,320 @@
 
 <div id="gameScreen" class="hidden text-center max-w-xl p-6">
 
-<div class="w-full bg-slate-700 h-3 mb-4">
-  <div id="progressBar" class="bg-green-500 h-3" style="width:0%"></div>
-</div>
+  <div class="w-full bg-slate-700 h-3 mb-4 rounded">
+    <div id="progressBar" class="bg-green-500 h-3 rounded" style="width:0%"></div>
+  </div>
 
-<p id="counter"></p>
-<p id="story"></p>
-<p id="question" class="mb-4"></p>
+  <p id="counter" class="mb-2"></p>
+  <p id="story" class="mb-2 text-lg"></p>
+  <p id="question" class="mb-4 font-bold"></p>
 
-<div id="options"></div>
+  <div id="options"></div>
 
-<div id="feedback" class="hidden mt-4 p-3 border"></div>
+  <div id="feedback" class="hidden mt-4 p-3 border rounded"></div>
 
-<div class="mt-4">
-⚖️ Ética: <span id="etica">0</span> |
-🔓 Risco: <span id="risco">0</span>
-</div>
+  <div class="mt-4">
+    ⚖️ Ética: <span id="etica">0</span> |
+    🔓 Risco: <span id="risco">0</span>
+  </div>
 
 </div>
 
 <script>
 
-let step = 0, etica = 0, risco = 0;
+let step = 0;
+let etica = 0;
+let risco = 0;
 
-function startGame(){
+// 🔥 15 PERGUNTAS BALANCEADAS
+const scenes = [
+  {
+    story: "⏰ Você acorda pela manhã e pega o celular.",
+    question: "Aparece em suas redes sociais que um filme que você está ansioso para assistir já estreou. O que você faz?",
+    options: [
+      {
+        text: "Procura o filme em sites de pirataria (gratuitos).",
+        e: -1,
+        r: 1,
+        f: "A pirataria prejudica criadores de conteúdo."
+      },
+      {
+        text: "Se planeja para ir ao cinema, ou espera o filme estrear em plataformas legais.",
+        e: 1,
+        r: -1,
+        f: "Você respeita direitos autorais e apoia a criação de novos conteúdos."
+      }
+    ]
+  },
+
+  {
+    story: "📱 Você baixa um app na Play Store/Apple Store.",
+    question: "Ele pede acesso aos seus dados. O que você faz?",
+    options: [
+      {
+        text: "Aceita sem verificar que dados vão ser compartilhados.",
+        e: -2,
+        r: 2,
+        f: "Risco de exposição de dados sensíveis."
+      },
+      {
+        text: "Você revisa que dados vão ser compartilhados, e só concede acesso aos dados realmente necessários para uso do app.",
+        e: 2,
+        r: -2,
+        f: "Protege sua privacidade e evita uso indevido de seus dados."
+      }
+    ]
+  },
+
+  {
+    story: "📰 Você entra em suas redes sociais e vê uma notícia chocante.",
+    question: "O que faz?",
+    options: [
+      {
+        text: "Compartilha a notícia apenas se deixando levar pela emoção do momento.",
+        e: -2,
+        r: 2,
+        f: "Pode ser conteúdo falso."
+      },
+      {
+        text: "Verifica a origem e veracidade dos fatos através de fontes confiáveis.",
+        e: 2,
+        r: -2,
+        f: "Atua de forma responsável e evita a expansão de fake news."
+      }
+    ]
+  },
+
+  {
+    story: "💻 Seu colega de trabalho comenta que houve um vazamento de dados de usuários da empresa.",
+    question: "Como você reage?",
+    options: [
+      {
+        text: "Você tenta acalmar a situação, mas ignora a gravidade do vazamento.",
+        e: -3,
+        r: 3,
+        f: "O problema continua e provavelmente irá se repetir no futuro."
+      },
+      {
+        text: "Você reconhece a gravidade do vazamento de dados e toma medidas imediatas para contê-lo, investigá-lo e comunicá-lo de forma responsável às partes afetadas.",
+        e: 3,
+        r: -3,
+        f: "Você valoriza segurança e evita problemas futuros."
+      }
+    ]
+  },
+
+  {
+    story: "🔐 Você está lendo um material sobre proteção de dados e encontra uma recomendação para não reutilizar senhas em diferentes contas.",
+    question: "O que você decide?",
+    options: [
+      {
+        text: "Continua usando a mesma senha pois 'é mais prático assim'.",
+        e: -3,
+        r: 3,
+        f: "Você fica exposto a sofrer um ataque tipo credential stuffing."
+      },
+      {
+        text: "Troca e começa a utilizar senhas diferentes em cada conta.",
+        e: 3,
+        r: -3,
+        f: "Aumenta sua segurança em caso de ataques."
+      }
+    ]
+  },
+
+  {
+    story: "📍 Um app solicita sua localização.",
+    question: "Você imediatamente aceita?",
+    options: [
+      {
+        text: "Sim.",
+        e: -2,
+        r: 2,
+        f: "Compartilhar a localização pode expor sua privacidade e rotina, além de trazer riscos à sua segurança caso esses dados sejam usados de forma indevida."
+      },
+      {
+        text: "Não.",
+        e: 2,
+        r: -2,
+        f: "É recomendado autorizar apenas no momento em que for usar o app, e desativar logo depois."
+      }
+    ]
+  },
+
+  {
+    story: "📧 Você recebe um e-mail que parece suspeito: remetente desconhecido, contém erros gramaticais, links ou anexos inesperados e solicita dados pessoais com urgência.",
+    question: "O que você faz?",
+    options: [
+      {
+        text: "Responde imediatamente.",
+        e: -3,
+        r: 3,
+        f: "Você fica exposto a sofrer um golpe ou ataque cibernético."
+      },
+      {
+        text: "Ignora e denuncia como SPAM.",
+        e: 3,
+        r: -3,
+        f: "Você se protege de receber e-mails similares no futuro e ajuda os provedores de e-mail a bloquear estas ameaças para outros usuários."
+      }
+    ]
+  },
+
+  {
+    story: "💬 Um amigo seu compartilha um conteúdo que você sabe que é falso.",
+    question: "Como você reage a isso?",
+    options: [
+      {
+        text: "Ignora e continua seu dia normalmente.",
+        e: -2,
+        r: 2,
+        f: "A desinformação continua se propagando."
+      },
+      {
+        text: "Avisa seu amigo e denuncia na plataforma em que foi publicada.",
+        e: 2,
+        r: -2,
+        f: "Forma responsável de atuar."
+      }
+    ]
+  },
+
+  {
+    story: "📦 Você precisa de um software que é pago.",
+    question: "O que você faz?",
+    options: [
+      {
+        text: "Procura e baixa gratuitamente na internet.",
+        e: -3,
+        r: 3,
+        f: "Baixar software pirata pode comprometer a segurança do seu dispositivo, expor dados pessoais a malware e ainda gerar problemas legais."
+      },
+      {
+        text: "Compra e baixa por plataformas oficiais.",
+        e: 3,
+        r: -3,
+        f: "Software pago e oficial oferece mais segurança, suporte, atualizações e uso legal sem riscos."
+      }
+    ]
+  },
+
+  {
+    story: "🔒 Um aplicativo recomenda que você ative sua autenticação em dois fatores (2FA).",
+    question: "O que você faria?",
+    options: [
+      {
+        text: "Não ativaria.",
+        e: -3,
+        r: 3,
+        f: "Sua conta fica vulnerável a ataques de roubo de senhas, phishing, credential stuffing e acesso não autorizado após vazamentos de dados."
+      },
+      {
+        text: "Ativaria imediatamente.",
+        e: 3,
+        r: -3,
+        f: "Conta mais segura, exige senha e uma segunda verificação para acesso."
+      }
+    ]
+  },
+
+  {
+    story: "📊 Uso de dados.",
+    question: "Você aceita que o serviço utilize seus dados pessoais para melhorar recomendações?",
+    options: [
+      {
+        text: "Aceitar tudo sem ler os detalhes.",
+        e: -2,
+        r: 2,
+        f: "Você perde controle sobre como seus dados são utilizados e compartilhados."
+      },
+      {
+        text: "Limitar o uso apenas ao necessário.",
+        e: 2,
+        r: -2,
+        f: "Você mantém mais privacidade e controle sobre suas informações pessoais."
+      }
+    ]
+  },
+
+  {
+    story: "📱 Instala apps.",
+    question: "Ao instalar um aplicativo, ele pede várias permissões. O que você faz?",
+    options: [
+      {
+        text: "Concede todas as permissões sem verificar.",
+        e: -2,
+        r: 2,
+        f: "Isso pode permitir acesso desnecessário a dados pessoais e aumentar riscos de segurança."
+      },
+      {
+        text: "Analisa e libera apenas o que for essencial.",
+        e: 2,
+        r: -2,
+        f: "Você protege sua privacidade e reduz riscos de exposição de dados."
+      }
+    ]
+  },
+
+  {
+    story: "🧾 Termos aparecem.",
+    question: "Antes de usar um app ou serviço, você lê os termos de uso?",
+    options: [
+      {
+        text: "Nunca lê, apenas aceita rapidamente.",
+        e: -1,
+        r: 1,
+        f: "Você pode estar concordando com regras e usos de dados sem saber."
+      },
+      {
+        text: "Lê ao menos os pontos principais antes de aceitar.",
+        e: 1,
+        r: -1,
+        f: "Você toma decisões mais conscientes e informadas."
+      }
+    ]
+  },
+
+  {
+    story: "📣 Post polêmico viraliza.",
+    question: "Você vê um conteúdo viral com informações duvidosas. O que faz?",
+    options: [
+      {
+        text: "Compartilha imediatamente para seus amigos.",
+        e: -3,
+        r: 3,
+        f: "Você pode contribuir para a disseminação de fake news e desinformação."
+      },
+      {
+        text: "Verifica fontes confiáveis antes de compartilhar.",
+        e: 3,
+        r: -3,
+        f: "Você ajuda a combater a desinformação e age com responsabilidade digital."
+      }
+    ]
+  },
+
+  {
+    story: "🌙 Final do dia.",
+    question: "Você tem acesso a dados de outra pessoa sem autorização. O que você faz?",
+    options: [
+      {
+        text: "Usa os dados mesmo assim.",
+        e: -3,
+        r: 3,
+        f: "Isso é uma violação de privacidade, ética digital e pode ter consequências legais."
+      },
+      {
+        text: "Respeita a privacidade e não acessa os dados.",
+        e: 3,
+        r: -3,
+        f: "Você age corretamente e respeita a ética e a legislação de proteção de dados."
+      }
+    ]
+  }
+];
+
+function startGame() {
   step = 0;
   etica = 0;
   risco = 0;
@@ -65,149 +359,58 @@ function startGame(){
   document.getElementById("startScreen").classList.add("hidden");
   document.getElementById("gameScreen").classList.remove("hidden");
 
+  document.getElementById("etica").innerText = etica;
+  document.getElementById("risco").innerText = risco;
+
   load();
 }
 
-// 🔥 15 PERGUNTAS BALANCEADAS
-const scenes = [
-{story:"⏰ Você acorda pela manhã  e pega o celular.",question:"Aparece em suas redes sociais que um filme que você esta ansioso para assistir já estreou. O que você faz?",
-options:[
-{text:"Procura o filme em sites de pirataria (gratuitos).",e:-1,r:1,f:"A Pirataria prejudica criadores de conteudo."},
-{text:"Se planeja para ir ao cinema, ou espera o filme estrear em plataformas legais.",e:1,r:-1,f:"Você respeita direitos autorais e apoia a criação de novos conteúdos."}
-]},
-
-
-{story:"📱 Você baixa um app no Playstore/Apple Store.",question:"Ele pede acesso ao seus dados. O que você faz?",
-options:[
-{text:"Aceita sem verificar que dados vão ser compartilhados.",e:-2,r:2,f:"Risco de exposição de dados sensiveis."},
-{text:"Você revisa que dados vão ser compartilhados, e só concede o acesso a dados especificamente necessarios para uso do app.",e:2,r:-2,f:"Protege sua privacidade e evita uso idevido de seus dados."}
-]},
-
-
-{story:"📰 Você entra em suas redes sociais e vê uma notícia chocante.",question:"O que faz?",
-options:[
-{text:"Compartilha a noticia apenas se deixando levar pela emoção do momento. ",e:-2,r:2,f:"Pode ser conteudo falso."},
-{text:"Verifica a origem e veracidade dos fatos a traves de fontes confiáveis.",e:2,r:-2,f:"Atua de forma responsável e evita expansão de Fake News."}
-]},
-
-
-{story:"💻 Seu colega de trabalho comenta que houve um vazamento de dados de usuarios da empresa.",question:"Como você reage?",
-options:[
-{text:"Você tenta acalmar a situação, mas ignora a gravidade do vazamento.",e:-3,r:3,f:"Problema continua e provavelmente irá se repetir a futuro."},
-{text:"Você reconhece a gravidade do vazamento de dados e toma medidas imediatas para contê-lo, investigá-lo e comunicá-lo de forma responsável às partes afetadas.",e:3,r:-3,f:"Você valoriza segurança e evita problemas futuros."}
-]},
-
-
-{story:"🔐 Você está lendo um material sobre proteção de dados e encontra uma recomendação para não reutilizar senhas em diferentes contas..",question:"O que voce decide?",
-options:[
-{text:"Continua usando a mesma senha pois 'É Mais pratico assim.'. ",e:-3,r:3,f:"Você fica exposto a sofrer um ataque tipo 'Credential stuffing'"},
-{text:"Troca e começa a utilizar senhas diferentes em cada conta.",e:3,r:-3,f:"Aumenta sua segurança em caso de ataques."}
-]},
-
-
-{story:"📍 Um app solicita sua localização.",question:"Você imediatamente aceita?",
-options:[
-{text:"Sim",e:-2,r:2,f:"Compartilhar a localização pode expor sua privacidade e rotina, além de trazer riscos à sua segurança caso esses dados sejam usados de forma indevida."},
-{text:"Não.",e:2,r:-2,f:"É recomendado autorizar no momento que for usar o app, e desativar logo depois."}
-]},
-
-
-{story:"📧 Você recebe um e-mail que parece suspeito: remetente desconhecido, contem erros gramaticais, links ou anexos inesperados e solicita dados pessoais com urgência.",question:"O que você faz?",
-options:[
-{text:"Responde imediatamente.",e:-3,r:3,f:"Você fica exposto a sofrer um golpe ou ataque cibernético. "},
-{text:"Ignora e denuncia como SPAM.",e:3,r:-3,f:"Você se protege de receber e-mails similares a futuro, e ajuda a provedores de e-mail a bloquear estas ameaças a outros usuarios."}
-]},
-
-
-{story:"💬 Um amigo seu compartilha um conteudo que você sabe que é falso",question:"Como você reage a isso?",
-options:[
-{text:"Ignora e continua seu dia normalmente.",e:-2,r:2,f:"Desinformação continua se propagando."},
-{text:"Avisa seu amigo, e denuncia na plataforma em que foi publicada.",e:2,r:-2,f:"Forma responsável de atuar."}
-]},
-
-
-{story:"📦 Você precisa de um software que é pago.",question:"O que você faz?", 
-options:[
-{text:"Procura e baixa gratuitamente na internet.",e:-3,r:3,f:"Baixar software pirata pode comprometer a segurança do seu dispositivo, expor dados pessoais a malware e ainda gerar problemas legais."},
-{text:"Compra e baixa por plataformas oficiais. ",e:3,r:-3,f:"Software pago e oficial oferece mais segurança, suporte, atualizações e uso legal sem riscos."}
-]},
-
-
-{story:"🔒 Um aplicativo recomenda que você ative sua autenticação de credenciais em dois fatores (2FA)",question:"O que você faria?",
-options:[
-{text:"Não ativaria.",e:-3,r:3,f:"Sua conta fica vulnerável a ataques de roubo de senhas, phishing, credential stuffing e acesso não autorizado após vazamentos de dados."},
-{text:"Ativaria imediatamente.",e:3,r:-3,f:"Conta mais segura, exige senha e segunda verificação para acesso."}
-]},
-
-
-{story:"📊 Uso de dados.",question:"Você aceita que o serviço utilize seus dados pessoais para melhorar recomendações?",
-options:[
-{text:"Aceitar tudo sem ler os detalhes.",e:-2,r:2,f:"Você perde controle sobre como seus dados são utilizados e compartilhados."},
-{text:"Limitar o uso apenas ao necessário.",e:2,r:-2,f:"Você mantém mais privacidade e controle sobre suas informações pessoais."}
-]},
-
-
-{story:"📱 Instala apps.",question:"Ao instalar um aplicativo, ele pede várias permissões. O que você faz?",
-options:[
-{text:"Concede todas as permissões sem verificar.",e:-2,r:2,f:"Isso pode permitir acesso desnecessário a dados pessoais e aumentar riscos de segurança."},
-{text:"Analisa e libera apenas o que for essencial.",e:2,r:-2,f:"Você protege sua privacidade e reduz riscos de exposição de dados."}
-]},
-
-
-{story:"🧾 Termos aparecem.",question:"Antes de usar um app ou serviço, você lê os termos de uso?",
-options:[
-{text:"Nunca lê, apenas aceita rapidamente.",e:-1,r:1,f:"Você pode estar concordando com regras e usos de dados sem saber."},
-{text:"Lê ao menos os pontos principais antes de aceitar.",e:1,r:-1,f:"Você toma decisões mais conscientes e informadas."}
-]},
-
-
-{story:"📣 Post polêmico viraliza.",question:"Você vê um conteúdo viral com informações duvidosas. O que faz?",
-options:[
-{text:"Compartilha imediatamente para seus amigos.",e:-3,r:3,f:"Você pode contribuir para a disseminação de fake news e desinformação."},
-{text:"Verifica fontes confiáveis antes de compartilhar.",e:3,r:-3,f:"Você ajuda a combater a desinformação e age com responsabilidade digital."}
-]},
-
-
-{story:"🌙 Final do dia.",question:"Você tem acesso a dados de outra pessoa sem autorização. O que você faz?",
-options:[
-{text:"Usa os dados mesmo assim.",e:-3,r:3,f:"Isso é uma violação de privacidade, ética digital e pode ter consequências legais."},
-{text:"Respeita a privacidade e não acessa os dados.",e:3,r:-3,f:"Você age corretamente e respeita a ética e a legislação de proteção de dados."}
-]}
-];
-
-
-function load(){
-  if(step >= scenes.length){ endGame(); return; }
+function load() {
+  if (step >= scenes.length) {
+    endGame();
+    return;
+  }
 
   let s = scenes[step];
 
   document.getElementById("story").innerText = s.story;
   document.getElementById("question").innerText = s.question;
-  document.getElementById("counter").innerText = `Pergunta ${step+1} de ${scenes.length}`;
+  document.getElementById("counter").innerText = `Pergunta ${step + 1} de ${scenes.length}`;
 
   document.getElementById("progressBar").style.width =
-    (step / scenes.length) * 100 + "%";
+    ((step + 1) / scenes.length) * 100 + "%";
+
+  document.getElementById("feedback").classList.add("hidden");
+  document.getElementById("feedback").innerHTML = "";
 
   let optionsDiv = document.getElementById("options");
   optionsDiv.innerHTML = "";
 
   s.options.forEach(opt => {
     let btn = document.createElement("button");
-    btn.className = "w-full border p-2 mb-2";
+    btn.className = "w-full border p-2 mb-2 rounded hover:bg-white hover:text-black";
     btn.innerText = opt.text;
-    btn.onclick = () => answer(opt);
+
+    // Si ética es positiva, consideramos que esta opción es la correcta.
+    btn.dataset.correct = opt.e > 0 ? "true" : "false";
+
+    btn.onclick = () => answer(opt, btn);
     optionsDiv.appendChild(btn);
   });
 }
 
-function animateScore(id, val){
+function animateScore(id, val) {
   let el = document.getElementById(id);
   el.classList.add("score-anim");
   el.style.color = val > 0 ? "green" : "red";
-  setTimeout(()=>{el.classList.remove("score-anim"); el.style.color="white";},300);
+
+  setTimeout(() => {
+    el.classList.remove("score-anim");
+    el.style.color = "white";
+  }, 300);
 }
 
-function answer(op){
+function answer(op, selectedButton) {
   etica += op.e;
   risco += op.r;
 
@@ -217,16 +420,50 @@ function answer(op){
   animateScore("etica", op.e);
   animateScore("risco", op.r);
 
+  let feedback = document.getElementById("feedback");
+  feedback.classList.remove("hidden");
+  feedback.innerHTML = op.f;
+
+  let buttons = document.querySelectorAll("#options button");
+
+  buttons.forEach(btn => {
+    btn.disabled = true;
+    btn.classList.remove("hover:bg-white", "hover:text-black");
+
+    if (btn.dataset.correct === "true") {
+      // Opción correcta: verde
+      btn.classList.add("bg-green-600", "border-green-400", "text-white");
+    } else {
+      // Opción equivocada: rojo
+      btn.classList.add("bg-red-600", "border-red-400", "text-white");
+    }
+  });
+
+  // Marca la opción elegida con borde más fuerte
+  selectedButton.classList.add("ring-4", "ring-white");
+
   step++;
-  setTimeout(load,1500);
+
+  // Espera 5 segundos para que se pueda leer el recuadro antes de pasar a la siguiente pregunta
+  setTimeout(load, 5000);
 }
 
-function endGame(){
+// ✅ CORREÇÃO PRINCIPAL:
+// Agora o total é calculado pela soma real dos pontos de cada pergunta.
+// Assim, se responder tudo certo: Ética 100% e Risco 0%.
+// Se responder tudo errado: Ética 0% e Risco 100%.
+function calcularTotalPossivel() {
+  return scenes.reduce((total, scene) => {
+    let maiorValor = Math.max(...scene.options.map(op => Math.abs(op.e)));
+    return total + maiorValor;
+  }, 0);
+}
 
-  let total = scenes.length * 3;
+function endGame() {
+  let total = calcularTotalPossivel();
 
-  let eticaPct = ((etica + total) / (total*2)) * 100;
-  let riscoPct = ((risco + total) / (total*2)) * 100;
+  let eticaPct = ((etica + total) / (total * 2)) * 100;
+  let riscoPct = ((risco + total) / (total * 2)) * 100;
 
   eticaPct = Math.round(eticaPct);
   riscoPct = Math.round(riscoPct);
@@ -234,253 +471,249 @@ function endGame(){
   let perfil = "";
   let recomendacao = "";
 
-  if(eticaPct < 40 && riscoPct > 60){
+  if (eticaPct < 40 && riscoPct > 60) {
     perfil = "🔴 Usuário de Alto Risco";
     recomendacao = "Você não protege seus dados nem avalia o que compartilha. Alto risco digital.";
   } 
-  else if(eticaPct > 70 && riscoPct < 30){
+  else if (eticaPct > 70 && riscoPct < 30) {
     perfil = "🟢 Cidadão Digital Consciente";
     recomendacao = "Excelente comportamento digital.";
   } 
-  else if(eticaPct >= 40 && eticaPct <= 70){
+  else {
     perfil = "🟡 Usuário em Evolução";
     recomendacao = "Você já toma boas decisões, mas ainda pode melhorar.";
-  } 
-  
+  }
+
   document.body.innerHTML = `
-  <div class="p-6 max-w-4xl mx-auto text-white">
+    <div class="bg-slate-900 min-h-screen p-6 text-white">
+      <div class="max-w-4xl mx-auto">
 
-    <h1 class="text-3xl mb-4 text-center">📊 Resultado Final</h1>
+        <h1 class="text-3xl mb-4 text-center">📊 Resultado Final</h1>
 
-    <p class="text-center mb-4">
-      ⚖️ Ética: ${eticaPct}% | 🔓 Risco: ${riscoPct}%
-    </p>
+        <p class="text-center mb-4 text-lg">
+          ⚖️ Ética: ${eticaPct}% | 🔓 Risco: ${riscoPct}%
+        </p>
 
-    <!-- BARRAS -->
-    <div class="bg-slate-700 h-3 mt-3">
-      <div class="bg-green-500 h-3" style="width:${eticaPct}%"></div>
-    </div>
-
-    <div class="bg-slate-700 h-3 mt-2 mb-6">
-      <div class="bg-red-500 h-3" style="width:${riscoPct}%"></div>
-    </div>
-
-    <!-- PERFIL -->
-    <div class="border border-white rounded p-4 mb-4 text-center bg-slate-800">
-      <h2 class="text-xl font-bold">${perfil}</h2>
-    </div>
-
-    <p class="text-center mb-6 text-gray-300">${recomendacao}</p>
-
-    <hr class="my-6">
-
-    <!-- MAIS INFO -->
-    <button onclick="toggleAccordion(this)" class="w-full text-left p-3 font-bold border border-white rounded hover:bg-white hover:text-black">
-      📘 Mais informações ⬇
-    </button>
-
-    <div class="hidden border border-white border-t-0 p-4 text-sm">
-
-      <h2 class="text-2xl mb-4">🧠 Dilemas Éticos no Mundo Digital</h2>
-
-      <!-- PIRATARIA -->
-      <div class="border border-white rounded mb-3">
-        <button onclick="toggleAccordion(this)" class="w-full text-left p-3 font-bold">
-          🔓 Pirataria Digital ⬇
-        </button>
-        <div class="hidden p-3 border-t border-white text-sm">
-          <p><b>O que é?</b> Uso, download ou distribuição de conteúdos protegidos por direitos autorais sem autorização.</p>
-
-          <p class="mt-2"><b>Exemplos:</b> filmes, séries, músicas, softwares pirateados.</p>
-
-          <p class="mt-2"><b>Impactos positivos (argumento comum):</b><br>
-          ✔ Acesso gratuito à cultura e informação<br>
-          ✔ Democratização em países com baixo poder aquisitivo
-          </p>
-
-          <p class="mt-2"><b>Impactos negativos:</b><br>
-          ❌ Prejuízo financeiro a criadores e empresas<br>
-          ❌ Redução de investimentos em novos conteúdos<br>
-          ❌ Riscos de malware em sites ilegais
-          </p>
-
-          <p class="mt-2"><b>Discussão ética:</b><br>
-          O dilema está entre o direito ao acesso à cultura e o respeito ao trabalho intelectual e à propriedade intelectual.
-          </p>
+        <p class="text-center mb-2">Ética</p>
+        <div class="bg-slate-700 h-3 mt-1 rounded">
+          <div class="bg-green-500 h-3 rounded" style="width:${eticaPct}%"></div>
         </div>
-      </div>
 
-      <!-- SEGURANÇA -->
-      <div class="border border-white rounded mb-3">
-        <button onclick="toggleAccordion(this)" class="w-full text-left p-3 font-bold">
-          🔐 Segurança de Dados ⬇
-        </button>
-        <div class="hidden p-3 border-t border-white text-sm">
-          <p><b>O que é?</b> Conjunto de práticas que protegem informações pessoais contra acessos não autorizados, vazamentos ou ataques cibernéticos.</p>
-
-          <p class="mt-2"><b>Exemplos de riscos:</b><br>
-          • Vazamentos de bancos de dados<br>
-          • Phishing (golpes por e-mail ou mensagens)<br>
-          • Roubo de senhas (credential stuffing)
-          </p>
-
-          <p class="mt-2"><b>Boas práticas:</b><br>
-          ✔ Senhas fortes e únicas<br>
-          ✔ Autenticação em dois fatores (2FA)<br>
-          ✔ Atualização constante de sistemas
-          </p>
-
-          <p class="mt-2"><b>Discussão ética:</b><br>
-          Empresas coletam muitos dados pessoais. O dilema é equilibrar conveniência e personalização com proteção e privacidade.
-          </p>
+        <p class="text-center mt-4 mb-2">Risco</p>
+        <div class="bg-slate-700 h-3 mt-1 mb-6 rounded">
+          <div class="bg-red-500 h-3 rounded" style="width:${riscoPct}%"></div>
         </div>
-      </div>
 
-      <!-- PRIVACIDADE -->
-      <div class="border border-white rounded mb-3">
-        <button onclick="toggleAccordion(this)" class="w-full text-left p-3 font-bold">
-          👁️ Privacidade Digital ⬇
-        </button>
-        <div class="hidden p-3 border-t border-white text-sm">
-          <p><b>O que é?</b> Direito de controlar como suas informações pessoais são coletadas, usadas e compartilhadas.</p>
-
-          <p class="mt-2"><b>Exemplos:</b><br>
-          • Apps que rastreiam localização<br>
-          • Redes sociais que coletam comportamento<br>
-          • Cookies e rastreadores online
-          </p>
-
-          <p class="mt-2"><b>Riscos:</b><br>
-          ❌ Perfilamento de usuários<br>
-          ❌ Publicidade invasiva<br>
-          ❌ Perda de controle sobre dados pessoais
-          </p>
-
-          <p class="mt-2"><b>Discussão ética:</b><br>
-          O conflito está entre oferecer serviços personalizados e respeitar a autonomia e privacidade do usuário.
-          </p>
+        <div class="border border-white rounded p-4 mb-4 text-center bg-slate-800">
+          <h2 class="text-xl font-bold">${perfil}</h2>
         </div>
-      </div>
 
-      <!-- USO DA INFORMAÇÃO -->
-      <div class="border border-white rounded mb-3">
-        <button onclick="toggleAccordion(this)" class="w-full text-left p-3 font-bold">
-          ⚖️ Uso da Informação ⬇
+        <p class="text-center mb-6 text-gray-300">${recomendacao}</p>
+
+        <hr class="my-6">
+
+        <button onclick="toggleAccordion(this)" class="w-full text-left p-3 font-bold border border-white rounded hover:bg-white hover:text-black">
+          📘 Mais informações ⬇
         </button>
-        <div class="hidden p-3 border-t border-white text-sm">
-          <p><b>O que é?</b> Forma como informações são criadas, consumidas e compartilhadas na internet.</p>
 
-          <p class="mt-2"><b>Problema atual:</b><br>
-          A velocidade da informação muitas vezes é maior que a verificação da sua veracidade.
-          </p>
+        <div class="hidden border border-white border-t-0 p-4 text-sm">
 
-          <p class="mt-2"><b>Exemplos:</b><br>
-          • Fake news em redes sociais<br>
-          • Manipulação de opinião pública<br>
-          • Clickbaits e desinformação
-          </p>
+          <h2 class="text-2xl mb-4">🧠 Dilemas Éticos no Mundo Digital</h2>
 
-          <p class="mt-2"><b>Consequências:</b><br>
-          ❌ Desinformação em massa<br>
-          ❌ Polarização social<br>
-          ❌ Perda de confiança em fontes reais
-          </p>
+          <div class="border border-white rounded mb-3">
+            <button onclick="toggleAccordion(this)" class="w-full text-left p-3 font-bold">
+              🔓 Pirataria Digital ⬇
+            </button>
+            <div class="hidden p-3 border-t border-white text-sm">
+              <p><b>O que é?</b> Uso, download ou distribuição de conteúdos protegidos por direitos autorais sem autorização.</p>
 
-          <p class="mt-2"><b>Discussão ética:</b><br>
-          O dilema é entre liberdade de expressão e responsabilidade sobre o impacto da informação compartilhada.
-          </p>
+              <p class="mt-2"><b>Exemplos:</b> filmes, séries, músicas, softwares pirateados.</p>
+
+              <p class="mt-2"><b>Impactos positivos (argumento comum):</b><br>
+              ✔ Acesso gratuito à cultura e informação<br>
+              ✔ Democratização em países com baixo poder aquisitivo
+              </p>
+
+              <p class="mt-2"><b>Impactos negativos:</b><br>
+              ❌ Prejuízo financeiro a criadores e empresas<br>
+              ❌ Redução de investimentos em novos conteúdos<br>
+              ❌ Riscos de malware em sites ilegais
+              </p>
+
+              <p class="mt-2"><b>Discussão ética:</b><br>
+              O dilema está entre o direito ao acesso à cultura e o respeito ao trabalho intelectual e à propriedade intelectual.
+              </p>
+            </div>
+          </div>
+
+          <div class="border border-white rounded mb-3">
+            <button onclick="toggleAccordion(this)" class="w-full text-left p-3 font-bold">
+              🔐 Segurança de Dados ⬇
+            </button>
+            <div class="hidden p-3 border-t border-white text-sm">
+              <p><b>O que é?</b> Conjunto de práticas que protegem informações pessoais contra acessos não autorizados, vazamentos ou ataques cibernéticos.</p>
+
+              <p class="mt-2"><b>Exemplos de riscos:</b><br>
+              • Vazamentos de bancos de dados<br>
+              • Phishing (golpes por e-mail ou mensagens)<br>
+              • Roubo de senhas (credential stuffing)
+              </p>
+
+              <p class="mt-2"><b>Boas práticas:</b><br>
+              ✔ Senhas fortes e únicas<br>
+              ✔ Autenticação em dois fatores (2FA)<br>
+              ✔ Atualização constante de sistemas
+              </p>
+
+              <p class="mt-2"><b>Discussão ética:</b><br>
+              Empresas coletam muitos dados pessoais. O dilema é equilibrar conveniência e personalização com proteção e privacidade.
+              </p>
+            </div>
+          </div>
+
+          <div class="border border-white rounded mb-3">
+            <button onclick="toggleAccordion(this)" class="w-full text-left p-3 font-bold">
+              👁️ Privacidade Digital ⬇
+            </button>
+            <div class="hidden p-3 border-t border-white text-sm">
+              <p><b>O que é?</b> Direito de controlar como suas informações pessoais são coletadas, usadas e compartilhadas.</p>
+
+              <p class="mt-2"><b>Exemplos:</b><br>
+              • Apps que rastreiam localização<br>
+              • Redes sociais que coletam comportamento<br>
+              • Cookies e rastreadores online
+              </p>
+
+              <p class="mt-2"><b>Riscos:</b><br>
+              ❌ Perfilamento de usuários<br>
+              ❌ Publicidade invasiva<br>
+              ❌ Perda de controle sobre dados pessoais
+              </p>
+
+              <p class="mt-2"><b>Discussão ética:</b><br>
+              O conflito está entre oferecer serviços personalizados e respeitar a autonomia e privacidade do usuário.
+              </p>
+            </div>
+          </div>
+
+          <div class="border border-white rounded mb-3">
+            <button onclick="toggleAccordion(this)" class="w-full text-left p-3 font-bold">
+              ⚖️ Uso da Informação ⬇
+            </button>
+            <div class="hidden p-3 border-t border-white text-sm">
+              <p><b>O que é?</b> Forma como informações são criadas, consumidas e compartilhadas na internet.</p>
+
+              <p class="mt-2"><b>Problema atual:</b><br>
+              A velocidade da informação muitas vezes é maior que a verificação da sua veracidade.
+              </p>
+
+              <p class="mt-2"><b>Exemplos:</b><br>
+              • Fake news em redes sociais<br>
+              • Manipulação de opinião pública<br>
+              • Clickbaits e desinformação
+              </p>
+
+              <p class="mt-2"><b>Consequências:</b><br>
+              ❌ Desinformação em massa<br>
+              ❌ Polarização social<br>
+              ❌ Perda de confiança em fontes reais
+              </p>
+
+              <p class="mt-2"><b>Discussão ética:</b><br>
+              O dilema é entre liberdade de expressão e responsabilidade sobre o impacto da informação compartilhada.
+              </p>
+            </div>
+          </div>
+
         </div>
+
+        <hr class="my-6">
+
+        <button onclick="toggleAccordion(this)" class="w-full text-left p-3 font-bold border border-white rounded hover:bg-white hover:text-black">
+          ⚖️ Conheça mais sobre a LGPD ⬇
+        </button>
+
+        <div class="hidden border border-white border-t-0 p-4 text-sm">
+
+          <h2 class="text-xl mb-2">📘 O que é a LGPD?</h2>
+
+          <p>
+            A Lei Geral de Proteção de Dados (Lei nº 13.709/2018) regula como dados pessoais devem ser coletados, armazenados e compartilhados.
+          </p>
+
+          <p class="mt-2">
+            Aplica-se a qualquer organização que lide com dados no Brasil.
+          </p>
+
+          <h2 class="text-lg mt-4">🧱 Pilares principais da LGPD</h2>
+
+          <p><b>1. Finalidade:</b> os dados só podem ser usados para objetivos claros e informados ao usuário.</p>
+          <p><b>2. Adequação:</b> o uso dos dados deve ser compatível com o que foi informado inicialmente.</p>
+          <p><b>3. Necessidade:</b> coleta apenas do mínimo necessário de dados.</p>
+          <p><b>4. Transparência:</b> o usuário deve saber como seus dados são usados.</p>
+          <p><b>5. Segurança:</b> proteção contra acessos não autorizados e vazamentos.</p>
+          <p><b>6. Responsabilização:</b> empresas devem responder por mau uso dos dados.</p>
+
+          <hr class="my-4">
+
+          <h2 class="text-lg">📜 Direitos do Titular (Art. 18)</h2>
+
+          <ul class="list-disc ml-5">
+            <li><b>Acesso:</b> saber quais dados estão sendo coletados.</li>
+            <li><b>Correção:</b> corrigir dados incorretos ou desatualizados.</li>
+            <li><b>Exclusão:</b> solicitar remoção de dados pessoais.</li>
+            <li><b>Portabilidade:</b> transferir dados para outro serviço.</li>
+            <li><b>Revogação do consentimento:</b> parar o uso dos dados a qualquer momento.</li>
+          </ul>
+
+          <hr class="my-4">
+
+          <h2 class="text-lg">🌍 Casos reais</h2>
+
+          <p><b>📌 Cambridge Analytica (Facebook):</b></p>
+          <p>
+            Uma empresa coletou dados de milhões de usuários do Facebook sem consentimento adequado, através de um aplicativo de testes psicológicos.
+            Esses dados foram usados para criar perfis políticos e influenciar eleições, especialmente nos EUA e Reino Unido.
+          </p>
+
+          <p class="mt-2">
+            O caso mostrou como dados pessoais podem ser usados para manipulação de comportamento em massa.
+          </p>
+
+          <br>
+
+          <p><b>📌 Vazamentos de dados no Brasil:</b></p>
+          <p>
+            Diversas instituições públicas e privadas tiveram bancos de dados expostos, incluindo informações como CPF, endereço e dados bancários.
+            Esses vazamentos ocorreram principalmente por falhas de segurança e má proteção de sistemas.
+          </p>
+
+          <p class="mt-2">
+            Isso gerou riscos de fraudes, golpes e uso indevido de identidade.
+          </p>
+
+          <a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" target="_blank" class="text-blue-400 underline block mt-2">
+            📎 Acessar texto oficial da LGPD
+          </a>
+
+        </div>
+
+        <div class="text-center mt-6">
+          <button onclick="location.reload()" class="border px-4 py-2 rounded hover:bg-white hover:text-black">
+            🔄 Jogar novamente
+          </button>
+        </div>
+
       </div>
-
     </div>
-
-    <hr class="my-6">
-
-    <!-- LGPD -->
-    <button onclick="toggleAccordion(this)" class="w-full text-left p-3 font-bold border border-white rounded hover:bg-white hover:text-black">
-      ⚖️ Conheça mais sobre a LGPD ⬇
-    </button>
-
-    <div class="hidden border border-white border-t-0 p-4 text-sm">
-
-      <h2 class="text-xl mb-2">📘 O que é a LGPD?</h2>
-
-      <p>
-      A Lei Geral de Proteção de Dados (Lei nº 13.709/2018) regula como dados pessoais devem ser coletados, armazenados e compartilhados.
-      </p>
-      <p class="mt-2">
-      Aplica-se a qualquer organização que lide com dados no Brasil.
-      </p>
-      <h2 class="text-lg">🧱 Pilares principais da LGPD</h2>
-
-      <p><b>1. Finalidade:</b> os dados só podem ser usados para objetivos claros e informados ao usuário.</p>
-
-      <p><b>2. Adequação:</b> o uso dos dados deve ser compatível com o que foi informado inicialmente.</p>
-
-      <p><b>3. Necessidade:</b> coleta apenas do mínimo necessário de dados.</p>
-
-      <p><b>4. Transparência:</b> o usuário deve saber como seus dados são usados.</p>
-
-      <p><b>5. Segurança:</b> proteção contra acessos não autorizados e vazamentos.</p>
-
-      <p><b>6. Responsabilização:</b> empresas devem responder por mau uso dos dados.</p>
-<hr class="my-4">
-
-<h2 class="text-lg">📜 Direitos do Titular (Art. 18)</h2>
-
-<ul class="list-disc ml-5">
-<li><b>Acesso:</b> saber quais dados estão sendo coletados</li>
-<li><b>Correção:</b> corrigir dados incorretos ou desatualizados</li>
-<li><b>Exclusão:</b> solicitar remoção de dados pessoais</li>
-<li><b>Portabilidade:</b> transferir dados para outro serviço</li>
-<li><b>Revogação do consentimento:</b> parar o uso dos dados a qualquer momento</li>
-</ul>
-<hr class="my-4">
-
-<h2 class="text-lg">🌍 Casos reais</h2>
-
-<p><b>📌 Cambridge Analytica (Facebook):</b></p>
-<p>
-Uma empresa coletou dados de milhões de usuários do Facebook sem consentimento adequado, através de um aplicativo de testes psicológicos.
-Esses dados foram usados para criar perfis políticos e influenciar eleições, especialmente nos EUA e Reino Unido.
-</p>
-
-<p class="mt-2">
-O caso mostrou como dados pessoais podem ser usados para manipulação de comportamento em massa.
-</p>
-
-<br>
-
-<p><b>📌 Vazamentos de dados no Brasil:</b></p>
-<p>
-Diversas instituições públicas e privadas tiveram bancos de dados expostos, incluindo informações como CPF, endereço e dados bancários.
-Esses vazamentos ocorreram principalmente por falhas de segurança e má proteção de sistemas.
-</p>
-
-<p class="mt-2">
-Isso gerou riscos de fraudes, golpes e uso indevido de identidade.
-</p>
-<a href="https://www.planalto.gov.br/ccivil_03/_ato2015-2018/2018/lei/l13709.htm" target="_blank" class="text-blue-400 underline block mt-2">
-📎 Acessar texto oficial da LGPD
-</a>
-
-    </div>
-
-    <div class="text-center mt-6">
-      <button onclick="location.reload()" class="border px-4 py-2 rounded hover:bg-white hover:text-black">
-        🔄 Jogar novamente
-      </button>
-    </div>
-
-  </div>
   `;
 
-  // 🔥 FIX GLOBAL
-  window.toggleAccordion = function(btn){
+  window.toggleAccordion = function(btn) {
     const content = btn.nextElementSibling;
     content.classList.toggle("hidden");
-  }
+  };
 }
+
 </script>
 </body>
 </html>
