@@ -22,6 +22,33 @@
   transform: scale(1.2);
   transition: 0.3s;
 }
+
+.avatar-bubble {
+  transition: 0.3s;
+}
+
+.avatar-good {
+  background: #16a34a;
+  border-color: #86efac;
+  transform: scale(1.05);
+}
+
+.avatar-bad {
+  background: #dc2626;
+  border-color: #fca5a5;
+  transform: scale(1.05);
+}
+
+.avatar-neutral {
+  background: #1e293b;
+  border-color: #ffffff;
+}
+
+.avatar-face {
+  font-size: 3rem;
+  transition: 0.3s;
+}
+
 </style>
 </head>
 
@@ -42,13 +69,20 @@
     <div id="progressBar" class="bg-green-500 h-3 rounded" style="width:0%"></div>
   </div>
 
+  <!-- Mentor Digital -->
+  <div id="mentorBox" class="avatar-bubble avatar-neutral border rounded-xl p-4 mb-4">
+    <div id="mentorFace" class="avatar-face">🤖</div>
+    <h2 class="font-bold text-lg mt-2">Mentor de Segurança Digital</h2>
+    <p id="mentorText" class="text-sm text-gray-200 mt-2">
+      Leia com atenção e escolha a atitude mais segura e ética.
+    </p>
+  </div>
+
   <p id="counter" class="mb-2"></p>
   <p id="story" class="mb-2 text-lg"></p>
   <p id="question" class="mb-4 font-bold"></p>
 
   <div id="options"></div>
-
-  <div id="feedback" class="hidden mt-4 p-3 border rounded"></div>
 
   <div class="mt-4">
     ⚖️ Ética: <span id="etica">0</span> |
@@ -149,7 +183,7 @@ const scenes = [
         text: "Continua usando a mesma senha pois 'é mais prático assim'.",
         e: -3,
         r: 3,
-        f: "Você fica exposto a sofrer um ataque tipo credential stuffing."
+        f: "Você fica exposto a sofrer um ataque chamado credential stuffing, onde criminosos utilizam senhas vazadas de outros sites para tentar acessar suas contas automaticamente em diferentes plataformas."
       },
       {
         text: "Troca e começa a utilizar senhas diferentes em cada conta.",
@@ -380,8 +414,16 @@ function load() {
   document.getElementById("progressBar").style.width =
     ((step + 1) / scenes.length) * 100 + "%";
 
-  document.getElementById("feedback").classList.add("hidden");
-  document.getElementById("feedback").innerHTML = "";
+
+
+  // Reset do mentor em cada nova pergunta
+  let mentorBox = document.getElementById("mentorBox");
+  let mentorFace = document.getElementById("mentorFace");
+  let mentorText = document.getElementById("mentorText");
+
+  mentorBox.className = "avatar-bubble avatar-neutral border rounded-xl p-4 mb-4";
+  mentorFace.innerText = "🤖";
+  mentorText.innerText = "Leia com atenção e escolha a atitude mais segura e ética.";
 
   let optionsDiv = document.getElementById("options");
   optionsDiv.innerHTML = "";
@@ -420,9 +462,26 @@ function answer(op, selectedButton) {
   animateScore("etica", op.e);
   animateScore("risco", op.r);
 
-  let feedback = document.getElementById("feedback");
-  feedback.classList.remove("hidden");
-  feedback.innerHTML = op.f;
+  // Reação do mentor digital
+  let mentorBox = document.getElementById("mentorBox");
+  let mentorFace = document.getElementById("mentorFace");
+  let mentorText = document.getElementById("mentorText");
+
+  if (op.e > 0) {
+    mentorBox.className = "avatar-bubble avatar-good border rounded-xl p-4 mb-4";
+    mentorFace.innerText = "🙂";
+    mentorText.innerHTML = `
+      <b>Boa decisão!</b><br><br>
+      <b>Explicação:</b> ${op.f}
+    `;
+  } else {
+    mentorBox.className = "avatar-bubble avatar-bad border rounded-xl p-4 mb-4";
+    mentorFace.innerText = "😨";
+    mentorText.innerHTML = `
+      <b>Cuidado!</b><br><br>
+      <b>Explicação:</b> ${op.f}
+    `;
+  }
 
   let buttons = document.querySelectorAll("#options button");
 
